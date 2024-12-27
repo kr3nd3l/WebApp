@@ -1,0 +1,124 @@
+﻿@page "/Tours/Edit/{Id:int}"
+
+@using BlazorApp2.Models
+@using System.Text.Json.Nodes
+
+
+
+<div class=" row">
+    <div class=" col-lg-8">
+        <h1 class=" mb-5">Edit Tour</h1>
+
+        @if (tour == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">Tour ID</label>
+                <div class=" col-md-8">
+                    <input class=" form-control-plaintext" value=" @Id" readonly>
+                </div>
+            </div>
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">CountryId</label>
+                <div class=" col-md-8">
+                    <input class=" form-control" @bind="TourData.CountryId">
+                    <span class=" text-danger">@Errors["CountryId"]?[0]</span>
+                </div>
+            </div>
+
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">Title</label>
+                <div class=" col-md-8">
+                    <input class=" form-control" @bind="TourData.Title">
+                    <span class=" text-danger">@Errors["Title"]?[0]</span>
+                </div>
+            </div>
+
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">Description</label>
+                <div class=" col-md-8">
+                    <input class=" form-control" @bind="TourData.Description">
+                    <span class=" text-danger">@Errors["Description"]?[0]</span>
+                </div>
+            </div>
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">Price</label>
+                <div class=" col-md-8">
+                    <input class=" form-control" @bind="TourData.Price">
+                    <span class=" text-danger">@Errors["Price"]?[0]</span>
+                </div>
+            </div>
+            <div class=" row mb-3">
+                <label class=" col-md-4 col-form-label">Duration</label>
+                <div class=" col-md-8">
+                    <input class=" form-control" @bind="TourData.Duration">
+                    <span class=" text-danger">@Errors["Duration"]?[0]</span>
+                </div>
+            </div>
+
+            <div class=" row">
+                <div class=" offset-md-4 col-md-4 d-grid">
+                    <button class=" btn btn-primary" @onclick="SaveTour">Submit</button>
+                </div>
+                <div class=" col-md-4 d-grid">
+                    <a class=" btn btn-outline-primary" href=" /Tours">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@inject HttpClient http
+@inject NavigationManager navManager
+
+@code {
+    [Parameter]
+    public int Id { set; get; }
+    public Tour? tour = null;
+    public TourDto TourData { set; get; } = new();
+    public JsonNode Errors { set; get; } = new JsonObject();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            tour = await http.GetFromJsonAsync<Tour>("https://localhost:4000/api/Tours/" + Id);
+            TourData.CountryId = tour.CountryId ;
+            TourData.Title = tour.Title ?? " ";
+            TourData.Description = tour?.Description ?? " ";
+            TourData.Price = tour.Price;
+            TourData.Duration = tour.Duration;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception : " + ex.Message);
+        }
+    }
+
+
+    protected async Task SaveTour()
+    {
+        var response = await http.PutAsJsonAsync("https://localhost:4000/api/Tours/" + Id, TourData);
+        if (response.IsSuccessStatusCode)
+        {
+            navManager.NavigateTo("Tours");
+        }
+        else
+        {
+            var strResponse = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var jsonResponse = JsonNode.Parse(strResponse);
+                Errors = jsonResponse?["errors"] ?? new JsonObject();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
+}

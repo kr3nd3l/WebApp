@@ -1,0 +1,20 @@
+﻿@page "/Countries/Delete/{Id:int}"
+
+<h1 class=" mb-3">Delete Country</h1>
+<p>Are you sure you want to delete country with ID @Id?</p>
+<button class=" btn btn-danger" @onclick="DeleteCountry">Delete</button>
+<a class=" btn btn-secondary" href=" /countries">Cancel</a>
+
+@inject HttpClient http
+@inject NavigationManager navManager
+@code {
+    [Parameter]
+    public int Id { set; get; }
+
+
+    protected async Task DeleteCountry()
+    {
+        var response = await http.DeleteAsync("https://localhost:4000/api/Countries/" + Id);
+        navManager.NavigateTo("/Countries");
+    }
+}

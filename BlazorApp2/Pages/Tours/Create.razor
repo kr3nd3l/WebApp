@@ -1,0 +1,90 @@
+﻿@page "/Tours/Create"
+@using BlazorApp2.Models
+
+
+<div class=" row">
+    <div class=" col-lg-8">
+        <h1 class=" mb-5"> New Tour</h1>
+
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">CountryId</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="TourData.CountryId">
+                <span class=" text-danger">@Errors["CountryId"]?[0]</span>
+            </div>
+        </div>
+
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Title</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="TourData.Title">
+                <span class=" text-danger">@Errors["Title"]?[0]</span>
+            </div>
+        </div>
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Description</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="TourData.Description">
+                <span class=" text-danger">@Errors["Description"]?[0]</span>
+            </div>
+        </div>
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Price</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="TourData.Price">
+                <span class=" text-danger">@Errors["Price"]?[0]</span>
+            </div>
+        </div>
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Duration</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="TourData.Duration">
+                <span class=" text-danger">@Errors["Duration"]?[0]</span>
+            </div>
+        </div>
+
+
+        <div class=" row">
+            <div class=" offset-md-4 col-md-4 d-grid">
+                <button class=" btn btn-primary" @onclick="SaveTour">Submit</button>
+            </div>
+            <div class=" col-md-4 d-grid">
+                <a class=" btn btn-outline-primary" href=" /Tours">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+@inject HttpClient http
+@inject NavigationManager navManager
+
+@using System.Text.Json.Nodes
+@code {
+    public TourDto TourData { set; get; } = new();
+    public JsonNode Errors { set; get; } = new JsonObject();
+
+
+    protected async Task SaveTour()
+    {
+        var response = await http.PostAsJsonAsync("https://localhost:4000/api/Tours", TourData);
+        if (response.IsSuccessStatusCode)
+        {
+            navManager.NavigateTo("/Tours");
+        }
+        else
+        {
+            var strResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Json Response: \n" + strResponse);
+
+
+            try
+            {
+                var jsonResponse = JsonNode.Parse(strResponse);
+                Errors = jsonResponse?["errors"] ?? new JsonObject();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
+}

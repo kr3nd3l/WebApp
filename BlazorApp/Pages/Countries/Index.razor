@@ -1,0 +1,50 @@
+﻿@page "/Countries"
+@using BlazorApp.Models
+
+<h1 class=" text-center mb-3">List of Countries</h1>
+
+<a class=" btn btn-ptimary mb-3" href="/Countries/Create">New Country</a>
+
+
+@if (countries == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class=" table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var country in countries)
+            {
+                <tr>
+                    <td>@country.Id</td>
+                    <td>@country.Name</td>
+                    <td>@country.Code</td>
+
+                    <td style="white-space:nowrap">
+
+                        <a class=" btn btn-primary btn-sm" href=" /Countries/Edit/@country.Id">Edit</a>
+                        <a class=" btn btn-danger btn-sm" href=" /Countries/Delete/@country.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@inject HttpClient http
+@code {
+    private List<Models.Country>? countries;
+    protected override async Task OnInitializedAsync()
+    {
+        countries = await http.GetFromJsonAsync<List<Models.Country>>("https://localhost:4000/api/Country");
+    }
+
+}

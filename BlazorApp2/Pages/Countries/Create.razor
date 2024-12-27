@@ -1,0 +1,69 @@
+﻿@page "/Countries/Create"
+@using BlazorApp2.Models
+
+
+<div class=" row">
+    <div class=" col-lg-8">
+        <h1 class=" mb-5"> New Country</h1>
+
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Name</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="CountryData.Name">
+                <span class=" text-danger">@Errors["Name"]?[0]</span>
+            </div>
+        </div>
+
+        <div class=" row mb-3">
+            <label class=" col-md-4 col-form-label">Code</label>
+            <div class=" col-md-8">
+                <input class=" form-control" @bind="CountryData.Code">
+                <span class=" text-danger">@Errors["Code"]?[0]</span>
+            </div>
+        </div>
+
+
+        <div class=" row">
+            <div class=" offset-md-4 col-md-4 d-grid">
+                <button class=" btn btn-primary" @onclick="SaveCountry">Submit</button>
+            </div>
+            <div class=" col-md-4 d-grid">
+                <a class=" btn btn-outline-primary" href=" /Countries">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+@inject HttpClient http
+@inject NavigationManager navManager
+
+@using System.Text.Json.Nodes
+@code {
+    public CountryDto CountryData { set; get; } = new();
+    public JsonNode Errors { set; get; } = new JsonObject();
+
+
+    protected async Task SaveCountry()
+    {
+        var response = await http.PostAsJsonAsync("https://localhost:4000/api/Countries", CountryData);
+        if (response.IsSuccessStatusCode)
+        {
+            navManager.NavigateTo("/Countries");
+        }
+        else
+        {
+            var strResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Json Response: \n" + strResponse);
+
+
+            try
+            {
+                var jsonResponse = JsonNode.Parse(strResponse);
+                Errors = jsonResponse?["errors"] ?? new JsonObject();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
+}

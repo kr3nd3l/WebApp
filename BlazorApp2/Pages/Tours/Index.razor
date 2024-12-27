@@ -1,0 +1,53 @@
+﻿@page "/Tours"
+@using BlazorApp2.Models
+<h1 class=" text-center mb-3">List of Tours</h1>
+
+<a class=" btn btn-primary mb-3" href=" /Tours/Create">New Tour</a>
+
+
+@if (tours == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class=" table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>CountryId</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in tours)
+            {
+                <tr>
+                    <td>@tour.Id</td>
+                    <td>@tour.CountryId</td>
+                    <td>@tour.Title</td>
+                    <td>@tour.Description</td>
+                    <td>@tour.Price</td>
+                    <td>@tour.Duration</td>
+                    <td style=" white-space:nowrap">
+                        <a class=" btn btn-primary btn-sm" href=" /Tours/Edit/@tour.Id">Edit</a>
+                        <a class=" btn btn-danger btn-sm" href=" /Tours/Delete/@tour.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+@inject HttpClient Http
+
+@code {
+    private List<Tour>? tours;
+    protected override async Task OnInitializedAsync()
+    {
+        tours = await Http.GetFromJsonAsync<List<Tour>>("https://localhost:4000/api/Tours");
+    }
+}
